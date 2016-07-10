@@ -1,0 +1,50 @@
+CREATE (a:Actor { name : 'Niels', title : 'l1' })
+CREATE (a:Actor { name : 'Richard', title : 'l2' })
+CREATE (a:Actor { name : 'Hans', title : 'l3' })
+CREATE (a:Actor { name : 'Sjors', title : 'l4' })
+CREATE (a:Actor { name : 'Laura', title : 'l5' })
+
+MATCH (person:Person)
+WHERE person.name IN ['Andres', 'Mark']
+RETURN person
+
+
+MATCH (a { name: 'Sjors' }) DELETE a 
+MATCH (n { name: 'Laura' }) SET n.name = 'Laura'
+
+CREATE INDEX ON :Actor(name)
+CREATE CONSTRAINT ON (a:Actor) ASSERT a.name IS UNIQUE
+
+
+MATCH (a:Actor),(b:Actor) 
+WHERE a.name = 'Niels' AND b.name = 'Richard' 
+CREATE (a)-[r:FOLLOWS]->(b) 
+RETURN r
+
+MATCH (n:Actor) RETURN n LIMIT 25
+start n=node(*) match (n:Actor) return count(n)
+
+MATCH (a:Actor)-[r:FOLLOWS]-(b:Actor) 
+WHERE a.name = 'Niels' AND b.name = 'Richard' 
+SET r.since = 'Last tuesday'
+RETURN r
+
+MATCH (a:Actor)-[r:FOLLOWS]-(b:Actor) 
+WHERE r.since == 'Last tuesday'
+RETURN r
+LIMIT 25
+
+MATCH (a:Actor)-[r:FOLLOWS]-(b:Actor) 
+WHERE r.since == 'Last tuesday'
+RETURN r
+LIMIT 25
+
+MERGE (a:Actor { name:'Niels' })
+ON CREATE SET m.released = 2012
+ON MATCH SET a.update = 1
+RETURN a
+
+MATCH (orgin:Actor)-[:FOLLOWS*0..2]-(from:Actor)
+MATCH (to:Actor)<-[:FOLLOWS]-(from)
+WHERE orgin.name = "Hans"
+RETURN from, to

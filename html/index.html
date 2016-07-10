@@ -1,0 +1,40 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/alchemyjs/0.4.2/alchemy.min.css"/>
+</head>
+<body>
+  <div class="alchemy" id="alchemy"></div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/alchemyjs/0.4.2/scripts/vendor.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/alchemyjs/0.4.2/alchemy.js"></script>
+  <script type="text/javascript">
+        $.getJSON("/graphs/dHdpdHRlcjovL3VzZXIvMzcxMjM4NjY3", function(data) {
+          var existingNodes = {}
+          var nodes = [] //{id,caption,avatar}
+          var edges = []; //{source, target, caption}
+
+          for (var d = 0; d < data.length; d++) {
+            var item = data[d];
+
+            if (existingNodes[item["from.uri"]] !== true) {
+              existingNodes[item["from.uri"]] = true;
+              nodes.push({ id: item["from.uri"], caption: item["from.name"], avatar: item["from.avatar"] });
+            }
+
+            if (existingNodes[item["to.uri"]] !== true) {
+              existingNodes[item["to.uri"]] = true;
+              nodes.push({ id: item["to.uri"], caption: item["to.name"], avatar: item["to.avatar"] });
+            }
+
+            edges.push({ source: item["from.uri"], target: item["to.uri"] });
+          }
+
+          config = { dataSource: { nodes: nodes, edges: edges } };
+          console.log(config)
+
+          alchemy = new Alchemy(config);
+        })
+    </script>
+  </body>
+</html>
