@@ -13,4 +13,4 @@ Open browser: http://localhost:7999/graphs/dHdpdHRlcjovL3VzZXIvMzcxMjM4NjY3
 ##View graph##
 Open browser: http://localhost:7999/
 
-![alt text](https://github.com/nielsbergsma/socialgraphvisualizer/notes/example.png "Example lay-out")
+![alt text](https://raw.githubusercontent.com/nielsbergsma/socialgraphvisualizer/master/notes/example.png "Example lay-out")

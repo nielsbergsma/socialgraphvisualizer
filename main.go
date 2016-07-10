@@ -1,26 +1,26 @@
 package main
 
 import (
-	"log"
-	"fmt"
-	"time"
-	"flag"
-	"net/http"
-	"encoding/json"
 	"encoding/base64"
+	"encoding/json"
+	"flag"
+	"fmt"
+	"log"
+	"net/http"
+	"time"
 
+	"./crawler"
 	"./graph"
 	"./model"
-	"./crawler"
 
-	"github.com/gorilla/mux"
 	"github.com/ChimeraCoder/anaconda"
+	"github.com/gorilla/mux"
 )
 
 var (
-	storage *graph.Graph
-	twitterClient *anaconda.TwitterApi
-	httpBindAddress = ":7999" 
+	storage         *graph.Graph
+	twitterClient   *anaconda.TwitterApi
+	httpBindAddress = ":7999"
 )
 
 func getGraph(w http.ResponseWriter, r *http.Request) {
@@ -59,27 +59,27 @@ func createGraph(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{ "error": "invalid body" }`))
 	}
 
-	crawler := crawler.NewTwitterCrawler(&model.Actor { Uri: body.Uri }, twitterClient)
+	crawler := crawler.NewTwitterCrawler(&model.Actor{Uri: body.Uri}, twitterClient)
 	defer crawler.Close()
 	go crawler.Run()
 
 	for {
 		select {
-		case actor := <- crawler.Actor:
+		case actor := <-crawler.Actor:
 			log.Printf("Found actor %s (%s)", actor.Name, actor.Uri)
 			storage.SetActor(actor, time.Now().UnixNano())
-		
-		case friendship := <- crawler.Friendship:		
+
+		case friendship := <-crawler.Friendship:
 			log.Printf("Found friendship %s (%s) - %s (%s)", friendship.From.Name, friendship.From.Uri, friendship.To.Name, friendship.To.Uri)
 			storage.SetFriendship(friendship)
 
-		case <- crawler.Completed:		
+		case <-crawler.Completed:
 			break
 		}
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Write([]byte(`{ "success": true }`))	
+	w.Write([]byte(`{ "success": true }`))
 }
 
 func main() {

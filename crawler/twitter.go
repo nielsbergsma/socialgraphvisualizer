@@ -2,8 +2,8 @@ package crawler
 
 import (
 	"log"
-	"time"
 	"strconv"
+	"time"
 
 	"../model"
 
@@ -11,31 +11,31 @@ import (
 )
 
 const (
-	MaxDepth = 2
+	MaxDepth             = 2
 	MaxFriendsPerRequest = 100
 )
 
 type (
 	TwitterCrawler struct {
-		actor *model.Actor
+		actor   *model.Actor
 		visited map[string]struct{}
 		twitter *anaconda.TwitterApi
 
-		Actor chan *model.Actor
+		Actor      chan *model.Actor
 		Friendship chan *model.Friendship
-		Completed chan struct{}
+		Completed  chan struct{}
 	}
 )
 
 func NewTwitterCrawler(actor *model.Actor, twitter *anaconda.TwitterApi) *TwitterCrawler {
-	return &TwitterCrawler {
-		actor: actor,
+	return &TwitterCrawler{
+		actor:   actor,
 		visited: map[string]struct{}{},
 		twitter: twitter,
 
-		Actor: make(chan *model.Actor),
+		Actor:      make(chan *model.Actor),
 		Friendship: make(chan *model.Friendship),
-		Completed: make(chan struct{}),
+		Completed:  make(chan struct{}),
 	}
 }
 
@@ -46,17 +46,20 @@ func (this *TwitterCrawler) Close() {
 }
 
 func (this *TwitterCrawler) Run() {
-	type QueueItem struct { Actor *model.Actor; Depth int } 
-	queue := []*QueueItem{ &QueueItem { this.actor, 0 } }
+	type QueueItem struct {
+		Actor *model.Actor
+		Depth int
+	}
+	queue := []*QueueItem{&QueueItem{this.actor, 0}}
 
-	for ; len(queue) > 0; queue = queue[1:]{
+	for ; len(queue) > 0; queue = queue[1:] {
 		item := queue[0]
 		if _, exist := this.visited[item.Actor.Uri]; exist {
 			continue
 		} else {
 			this.visited[item.Actor.Uri] = struct{}{}
 		}
-		
+
 		friends, err := this.getTwitterFriends(item.Actor.Uri)
 		if err != nil {
 			log.Printf("Encountered error %+v", err)
@@ -65,10 +68,10 @@ func (this *TwitterCrawler) Run() {
 
 		for _, friend := range friends {
 			this.Actor <- friend
-			this.Friendship <- &model.Friendship { item.Actor, friend }
+			this.Friendship <- &model.Friendship{item.Actor, friend}
 
-			if _, exist := this.visited[friend.Uri]; !exist && item.Depth + 1 < MaxDepth {
-				queue = append(queue, &QueueItem { friend, item.Depth + 1 })
+			if _, exist := this.visited[friend.Uri]; !exist && item.Depth+1 < MaxDepth {
+				queue = append(queue, &QueueItem{friend, item.Depth + 1})
 			}
 		}
 	}
@@ -77,9 +80,9 @@ func (this *TwitterCrawler) Run() {
 }
 
 func (this *TwitterCrawler) getTwitterFriends(uri string) ([]*model.Actor, error) {
-	parameters := map[string][]string {}
-	parameters["user_id"] = []string { uri[15:] }
-	parameters["count"] = []string { strconv.Itoa(MaxFriendsPerRequest) }
+	parameters := map[string][]string{}
+	parameters["user_id"] = []string{uri[15:]}
+	parameters["count"] = []string{strconv.Itoa(MaxFriendsPerRequest)}
 
 	response, err := this.twitter.GetFriendsIds(parameters)
 	if err != nil {
@@ -93,9 +96,9 @@ func (this *TwitterCrawler) getTwitterFriends(uri string) ([]*model.Actor, error
 
 	friends := []*model.Actor{}
 	for _, user := range users {
-		friends = append(friends, &model.Actor {
-			Uri: "twitter://user/" + user.IdStr,
-			Name: user.Name,
+		friends = append(friends, &model.Actor{
+			Uri:    "twitter://user/" + user.IdStr,
+			Name:   user.Name,
 			Avatar: user.ProfileBackgroundImageUrlHttps,
 		})
 	}
