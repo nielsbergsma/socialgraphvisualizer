@@ -8,8 +8,9 @@ curl -X POST -H "Content-Type: application/json" -d '{ "uri" : "twitter://user/3
 
 ##View data##
 Open browser: http://localhost:7999/graphs/dHdpdHRlcjovL3VzZXIvMzcxMjM4NjY3
- - id = base64 encoded: twitter://user/<id>
+ - /graphs/(id) = base64 encoded: twitter://user/(id)
 
 ##View graph##
 Open browser: http://localhost:7999/
 
+![alt text](https://github.com/nielsbergsma/socialgraphvisualizer/notes/example.png "Example lay-out")
